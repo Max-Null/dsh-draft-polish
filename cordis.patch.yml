@@ -1,0 +1,6 @@
+# @max-null/dsh-draft-polish bundle patch: one insert over the profile root.
+# Host half serves the /draft-polish/api routes; client half renders the
+# polish button in the composer's right tool seat (before the send button).
+- insert:
+    - id: draft-polish
+      name: '@max-null/dsh-draft-polish'
