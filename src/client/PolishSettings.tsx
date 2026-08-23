@@ -77,7 +77,11 @@ const CSS = [
   '.dpf-field+.dpf-field{border-top:1px solid var(--dsw-alias-border-l2)}',
   '.dpf-head{display:flex;align-items:center;gap:8px}',
   '.dpf-label{flex:1;min-width:0;font-size:13px;font-weight:500;line-height:1.5;color:var(--dsw-alias-label-primary)}',
-  '.dpf-check{flex:none;width:16px;height:16px;margin:0;accent-color:var(--dsw-alias-brand-primary);cursor:pointer}',
+  // 家族开关（dsh-ssid-panels 通知设置同款：40x22 胶囊 + 白色圆钮）。
+  '.dpf-switch{width:40px;height:22px;flex:none;border:none;border-radius:11px;cursor:pointer;padding:0;background:var(--dsw-alias-bg-module-platform,rgba(128,148,168,.2));transition:background .15s}',
+  '.dpf-switch.on{background:var(--dsw-alias-state-business-primary,#4FC3F7)}',
+  '.dpf-switch .knob{display:block;width:16px;height:16px;border-radius:8px;background:#fff;margin-left:2px;transition:margin-left .15s}',
+  '.dpf-switch.on .knob{margin-left:22px}',
   '.dpf-input{height:34px;padding:0 12px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-layer-3);font:inherit;font-size:13px;line-height:1.5;color:var(--dsw-alias-label-primary)}',
   '.dpf-input:focus-visible{outline:none;border-color:var(--dsw-alias-brand-primary)}',
   '.dpf-input::placeholder{color:var(--dsw-alias-label-tertiary)}',
@@ -199,12 +203,12 @@ export function PolishSettings(): ReactNode {
   const checkRow = (field: 'contextEnabled' | 'backgroundEnabled'): ReactNode =>
     createElement('div', { className: 'dpf-head' }, [
       createElement('span', { key: 'spacer', className: 'dpf-label' }, ''),
-      createElement('input', {
-        key: 'check',
-        className: 'dpf-check',
-        type: 'checkbox',
-        checked: form[field],
-        onChange: (e: { target: { checked: boolean } }) => { update(field, e.target.checked) },
+      createElement('button', {
+        key: 'switch',
+        className: `dpf-switch${form[field] ? ' on' : ''}`,
+        type: 'button',
+        'aria-label': field === 'contextEnabled' ? t.setContext : t.setBackground,
+        onClick: () => { update(field, !form[field]) },
       }),
     ])
 
