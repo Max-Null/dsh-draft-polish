@@ -1,6 +1,6 @@
 {
   "name": "@max-null/dsh-draft-polish",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "DSH 草稿润色：发送按钮左侧 ✨ 一键调用 LLM 润色输入框草稿，可选携带会话上下文帮助模型理解意图；走 DSH llm 渠道，会话进行中也能用",
   "type": "module",
   "license": "MIT",
