@@ -78,7 +78,7 @@ const CSS = [
   '.dpf-head{display:flex;align-items:center;gap:8px}',
   '.dpf-label{flex:1;min-width:0;font-size:13px;font-weight:500;line-height:1.5;color:var(--dsw-alias-label-primary)}',
   // 家族开关（dsh-ssid-panels 通知设置同款：40x22 胶囊 + 白色圆钮）。
-  '.dpf-switch{width:40px;height:22px;flex:none;border:none;border-radius:11px;cursor:pointer;padding:0;background:var(--dsw-alias-bg-module-platform,rgba(128,148,168,.2));transition:background .15s}',
+  '.dpf-switch{width:40px;height:22px;flex:none;border:none;border-radius:11px;cursor:pointer;padding:0;background:var(--dsw-alias-border-l4,rgba(0,0,0,.16));transition:background .15s}',
   '.dpf-switch.on{background:var(--dsw-alias-state-business-primary,#4FC3F7)}',
   '.dpf-switch .knob{display:block;width:16px;height:16px;border-radius:8px;background:#fff;margin-left:2px;transition:margin-left .15s}',
   '.dpf-switch.on .knob{margin-left:22px}',
