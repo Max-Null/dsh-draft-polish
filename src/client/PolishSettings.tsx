@@ -87,8 +87,8 @@ const CSS = [
   '.dpf-input::placeholder{color:var(--dsw-alias-label-tertiary)}',
   '.dpf-hint{margin:0;font-size:12px;line-height:1.5;color:var(--dsw-alias-label-tertiary)}',
   '.dpf-actions{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--dsw-alias-border-l2)}',
-  '.dpf-save{height:36px;padding:0 20px;border:none;border-radius:18px;background:var(--dsw-alias-bg-module-platform);font:inherit;font-size:14px;line-height:22px;color:var(--dsw-alias-label-primary);cursor:pointer}',
-  '.dpf-save:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}',
+  '.dpf-save{height:36px;padding:0 14px;border:none;border-radius:18px;background:var(--dsw-alias-button-primary-fill);font:inherit;font-size:14px;line-height:22px;color:var(--dsw-alias-label-primary-foreground);cursor:pointer}',
+  '.dpf-save:hover:not(:disabled){background:var(--dsw-alias-button-primary-hover)}',
   '.dpf-save:disabled{opacity:.5;cursor:default}',
   '.dpf-msg{margin:0;font-size:12px;line-height:1.5}',
   '.dpf-msg[data-ok=true]{color:var(--dsw-alias-state-success-primary)}',
@@ -214,8 +214,8 @@ export function PolishSettings(): ReactNode {
 
   return createElement('div', { className: 'dpf' }, [
     createElement('div', { key: 'head' }, [
-      createElement('h3', { style: { margin: '0 0 4px', fontSize: 16, fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, t.setTitle),
-      createElement('p', { style: { margin: 0, fontSize: 13, lineHeight: '20px', color: 'var(--dsw-alias-label-secondary)' } }, t.setSubtitle),
+      createElement('h3', { style: { margin: '0 0 4px', fontSize: 18, fontWeight: 600, lineHeight: '26px', color: 'var(--dsw-alias-label-primary)' } }, t.setTitle),
+      createElement('p', { style: { margin: 0, fontSize: 13, lineHeight: '20px', color: 'var(--dsw-alias-label-tertiary)' } }, t.setSubtitle),
     ]),
     createElement(Field, { key: 'ctx', label: t.setContext, hint: t.setContextHint },
       checkRow('contextEnabled')),
