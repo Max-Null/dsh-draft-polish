@@ -1,5 +1,9 @@
 # @max-null/dsh-draft-polish
 
+本插件属于 **`@max-null/*` 插件系列**——这一系列共同构成 **[SSID（思灵 · Seek Soul in Darkness）](https://github.com/Max-Null/seek-soul-in-darkness)** 桌面体验。SSID 是整合它们的盒：`dsh-capture` · `dsh-chat-rail` · `dsh-chinese-thinking` · `dsh-draft-polish` · `dsh-guardian` · `dsh-habit` · `dsh-header-unify` · `dsh-memory` · `dsh-node-appearance` · `dsh-plugin-center` · `dsh-skill-mcp-center` · `dsh-ssid-panels` · `dsh-ssid-zh-ui`。
+
+This plugin belongs to the **`@max-null/*` family** — a set of plugins that together form the **[SSID (思灵 · Seek Soul in Darkness)](https://github.com/Max-Null/seek-soul-in-darkness)** desktop experience.
+
 面向 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的**草稿润色**插件：发送按钮左侧的 ✨ 按钮，一键调用 LLM 把你写得不那么通顺的草稿改得更清晰、更得体，结果直接回填输入框，满意后再发送。
 
 > 从 **分形（OC 桌面壳）** 迁移进化的功能：OC 环境受 serve 并发缺陷限制，会话正在输出时无法润色；DSH 的 `llm` 能力与会话调度完全解耦，**会话进行中也能润色**，且可携带**当前会话上下文**帮助模型理解你的意图（参考 dsh-sidebar-qa 的提问带上下文机制）。
@@ -82,10 +86,6 @@ pnpm build       # 产出 lib/
 ```
 
 ## SSID 系列
-
-本插件属于 **`@max-null/*` 插件系列**——这一系列共同构成 **[SSID（思灵 · Seek Soul in Darkness）](https://github.com/Max-Null/seek-soul-in-darkness)** 桌面体验。SSID 是整合它们的盒：`dsh-capture` · `dsh-chat-rail` · `dsh-chinese-thinking` · `dsh-draft-polish` · `dsh-guardian` · `dsh-habit` · `dsh-header-unify` · `dsh-memory` · `dsh-node-appearance` · `dsh-plugin-center` · `dsh-skill-mcp-center` · `dsh-ssid-panels` · `dsh-ssid-zh-ui`。
-
-This plugin belongs to the **`@max-null/*` family** — a set of plugins that together form the **[SSID (思灵 · Seek Soul in Darkness)](https://github.com/Max-Null/seek-soul-in-darkness)** desktop experience.
 
 ## License
 
