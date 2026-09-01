@@ -3,3 +3,5 @@ lib/
 *.tgz
 *.log
 .DS_Store
+
+.npmrc
