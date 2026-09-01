@@ -1,8 +1,11 @@
 /**
- * PolishSettings: the settings.section entry — a compact form over the
- * host `draft-polish` settings namespace (fetched and saved through the
- * /draft-polish/api/config routes). Deliberately minimal: only the knobs a
- * user realistically touches live here; everything else keeps defaults.
+ * PolishSettings: the settings.plugin.item card (DSH 0.1.2-alpha.2 — the
+ * configurable-plugins tab entry keyed by the `draft-polish` namespace) — a
+ * compact form over the host `draft-polish` settings namespace (fetched and
+ * saved through the /draft-polish/api/config routes). Deliberately minimal:
+ * only the knobs a user realistically touches live here; everything else
+ * keeps defaults. The card manages its own state (no settingsScope face),
+ * so the register call supplies no inject hooks.
  *
  * Styling follows the DSH native settings language (ui-settings-plugins
  * `fields.module.css`): stacked fields with border-top separators, 13px

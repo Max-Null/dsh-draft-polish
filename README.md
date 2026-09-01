@@ -45,7 +45,7 @@ dsh plugin --profile <name> add @max-null/dsh-draft-polish
 
 ### 设置
 
-设置页 →「润色设置」（或配置命名空间 `draft-polish`）：
+设置页 →「可配置插件」→「草稿润色」卡片（DSH 0.1.2-alpha.2 起，配置命名空间 `draft-polish`）：
 
 | 配置 | 默认 | 说明 |
 |---|---|---|
@@ -64,8 +64,15 @@ dsh plugin --profile <name> add @max-null/dsh-draft-polish
 ## 架构
 
 - **host 半端**（`lib/index.js`）：`/draft-polish/api` 路由（trust fence 同 /api 网关）——`sessionQuery.readSurface` 读会话上下文 → `llm.stream` 润色（复用 DSH 渠道，独立于会话调度）→ 回传文本；`draft-polish` settings 命名空间。
-- **client 半端**（`lib/client.js`）：`conversation.input.right` 槽（发送按钮左侧官方座位）注入 ✨ 按钮——读草稿（owner props）→ fetch host → 结果经标准 kit `inputActions.setDraft` 写回；`settings.section` 注册设置表单。
+- **client 半端**（`lib/client.js`）：`conversation.input.right` 槽（发送按钮左侧官方座位）注入 ✨ 按钮——读草稿（owner props）→ fetch host → 结果经标准 kit `inputActions.setDraft` 写回；`settings.plugin.item`（可配置插件 tab，keyed by `draft-polish` 命名空间）注册设置卡片。模型渠道继承读会话标准座 `useProjection('modelSelection')`（host `model-selection-projection`，`next = pending ?? lastUsed`）。
 - 上下文策略继承 dsh-sidebar-qa：近期对话原文截断（锚定最新状态）+ 更早背景可选压缩（≤3 句摘要），从新到旧排列；任何失败降级为不带上下文，润色不中断。
+
+## 兼容性
+
+| 插件版本 | 适配 DSH 内核 | 说明 |
+|---|---|---|
+| 0.2.2+ | 0.1.2-alpha.2+ | client 端按 alpha.2 契约：无 `dsh-client-runtime`；设置卡片走 `settings.plugin.item`；模型继承走 `modelSelection` 投影 |
+| ≤0.2.1 | 0.1.1-rc.2 | `dsh-client-runtime` + `settings.section` + `connection.api.sessions.models`（alpha.2 均移除/失效） |
 
 ## 与 OC 版（分形）的差异
 

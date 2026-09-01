@@ -14,20 +14,47 @@ import { createElement, useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { draftPolishApi, DraftPolishApiError } from './api.ts'
 
-/** The props this entry reads (the runtime passes far more; these are the
- *  contract slices: InputZone owner + the standard-kit input actions). */
-export interface PolishButtonProps {
-  sessionId?: string
-  input?: { draft: string }
-  inputActions?: { setDraft(text: string): void }
-  /** Resolve the session's current model channel (the inherit path). */
-  resolveModel?: (sessionId: string) => Promise<ResolvedModel | undefined>
-}
-
-/** A resolved model channel (provider + model id). */
-export interface ResolvedModel {
+/** One provider selection ref inside the `modelSelection` projection view. */
+export interface ModelSelectionRef {
   provider: string
   model: string
+  reasoningEffort?: string
+}
+
+/** The `modelSelection` projection view (host model-selection-projection). */
+export interface ModelSelectionView {
+  lastUsed: ModelSelectionRef | null
+  next: ModelSelectionRef | null
+}
+
+/** Minimal slice of the session InputState snapshot (the selector contract). */
+interface DraftStateSlice {
+  draft: string
+}
+
+/** The props this entry reads (the runtime passes far more; these are the
+ *  contract slices: the session standard kit + the owner share fallback). */
+export interface PolishButtonProps {
+  sessionId?: string
+  /**
+   * Session-standard seat (DSH 0.1.2-alpha.2+): the per-session input
+   * snapshot hook. The composer's draft lives in InputState.draft. alpha.2
+   * also carries the InputZone owner share; since alpha.4 the entry has no
+   * owner, so the standard seat is the primary channel across both.
+   */
+  useInput?: <S>(selector: (state: DraftStateSlice) => S) => S
+  /**
+   * Legacy owner share (DSH 0.1.2-alpha.2/alpha.3): the InputZone entry
+   * provided `input.draft` through owner props. Kept as a fallback.
+   */
+  input?: { draft: string }
+  inputActions?: { setDraft(text: string): void }
+  /**
+   * Session-standard seat (DSH 0.1.2-alpha.2): the host projection reader.
+   * The `modelSelection` projection yields the session's current model
+   * channel (host model-selection-projection: `next` = pending ?? last-used).
+   */
+  useProjection?: (key: 'modelSelection') => ModelSelectionView | undefined
 }
 
 /** Product copy (zh/en via the document lang, same pattern as dsh-chat-rail). */
@@ -114,9 +141,14 @@ function IconSparkle(): ReactNode {
 /** One-click AI polish: draft → host → setDraft. */
 export function PolishButton(props: PolishButtonProps): ReactNode {
   const t = langStrings()
-  const draft = props.input?.draft ?? ''
+  // The composer draft: the session standard seat (alpha.4+) with the legacy
+  // InputZone owner share as fallback (alpha.2/alpha.3 hosts).
+  const inputState = props.useInput?.(state => state)
+  const draft = inputState?.draft ?? props.input?.draft ?? ''
   const setDraft = props.inputActions?.setDraft
-  const resolveModel = props.resolveModel
+  // The session's current model channel, read through the session standard
+  // seat at render time (framework hook discipline); used by the click path.
+  const selectionView = props.useProjection?.('modelSelection')
 
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState<{ text: string; error: boolean } | null>(null)
@@ -156,22 +188,16 @@ export function PolishButton(props: PolishButtonProps): ReactNode {
       sessionId: props.sessionId,
       text: draft,
     }
-    const inherit = (): Promise<void> => {
-      if (config.provider !== '') payload.provider = config.provider
-      if (config.model !== '') payload.model = config.model
-      if (payload.provider !== undefined || props.sessionId === undefined || resolveModel === undefined) {
-        return Promise.resolve()
-      }
-      // No configured provider: inherit the session's current channel.
-      return resolveModel(props.sessionId).then((resolved) => {
-        if (resolved !== undefined) {
-          payload.provider = resolved.provider
-          if (payload.model === undefined) payload.model = resolved.model
-        }
-      })
+    // Configured channel wins; otherwise inherit the session's current
+    // channel from the modelSelection projection.
+    if (config.provider !== '') payload.provider = config.provider
+    if (config.model !== '') payload.model = config.model
+    const selection = selectionView?.next ?? selectionView?.lastUsed
+    if (payload.provider === undefined && selection !== undefined && selection !== null) {
+      payload.provider = selection.provider
+      if (payload.model === undefined) payload.model = selection.model
     }
-    inherit()
-      .then(() => draftPolishApi.polish(payload))
+    draftPolishApi.polish(payload)
       .then((result) => {
         if (result.ok && result.text !== null && typeof setDraft === 'function') {
           setDraft(result.text)
@@ -187,7 +213,7 @@ export function PolishButton(props: PolishButtonProps): ReactNode {
         showToast(t.error + message, true)
       })
       .finally(() => { setLoading(false) })
-  }, [loading, draft, props.sessionId, config.provider, config.model, resolveModel, setDraft, showToast, t])
+  }, [loading, draft, props.sessionId, config.provider, config.model, selectionView, setDraft, showToast, t])
 
   return createElement('div', { className: 'dpp2-wrap' }, [
     createElement('button', {

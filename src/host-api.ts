@@ -25,6 +25,13 @@ export interface PolishResult {
   reason?: string
 }
 
+/** The lean default-channel face used when no explicit channel resolves. */
+export interface DefaultChannel {
+  provider: string
+  model: string
+  reasoningEffort?: string
+}
+
 /** The config namespace's live face: value + revision read, revision-guarded write. */
 export interface ConfigFace {
   get(): { value?: unknown; revision?: number }
@@ -99,6 +106,7 @@ export function buildApi(
   ctx: Pick<Context, 'llm' | 'sessionQuery'>,
   getConfig: () => DraftPolishConfig,
   getConfigFace: () => ConfigFace | undefined,
+  resolveDefaultChannel?: () => DefaultChannel | undefined,
 ): Record<string, ApiMethod> {
   return {
     config: (): DraftPolishConfig => getConfig(),
@@ -133,8 +141,18 @@ export function buildApi(
         ? record.sessionId
         : undefined
       const config = getConfig()
-      const provider = optionalString(record, 'provider') || config.provider
-      const model = optionalString(record, 'model') || config.model
+      let provider = optionalString(record, 'provider') || config.provider
+      let model = optionalString(record, 'model') || config.model
+
+      // 无显式渠道时回落到 DSH 默认模型渠道（agent-default-model：新会话
+      // 应用的默认选择）。会话投影未就绪/无记录时 provider 为空，这里兜底。
+      if (provider === '' || model === '') {
+        const fallback = resolveDefaultChannel?.()
+        if (fallback !== undefined) {
+          if (provider === '') provider = fallback.provider
+          if (model === '') model = fallback.model
+        }
+      }
 
       if (provider === '') {
         throw new DraftPolishError('no-provider', '未配置模型渠道（provider 为空）')

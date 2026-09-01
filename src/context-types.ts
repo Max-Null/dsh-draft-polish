@@ -102,6 +102,18 @@ export interface DraftPolishSettingsScope<T> {
   update(patch: object): Promise<void>
 }
 
+/** One current selection emitted by the agent-default-model service. */
+export interface DraftPolishDefaultSelection {
+  provider: string
+  model: string
+  reasoningEffort?: string
+}
+
+/** The agent-default-model service face (DSH 默认渠道，会话创建时应用). */
+export interface DraftPolishAgentDefaultModel {
+  currentSelection(): DraftPolishDefaultSelection
+}
+
 /** One registered namespace descriptor surfaced to configuration surfaces. */
 export interface DraftPolishSettingsDescriptor {
   ns: string
@@ -123,6 +135,7 @@ declare module '@deepseek-ai/cordis' {
     llm: DraftPolishLlmService
     loader: DraftPolishLoader
     settings: DraftPolishSettingsService
+    agentDefaultModel: DraftPolishAgentDefaultModel
     /**
      * Register a lifecycle callback (DSH-vendored cordis): runs at plugin
      * activation; its returned cleanup runs at disposal.

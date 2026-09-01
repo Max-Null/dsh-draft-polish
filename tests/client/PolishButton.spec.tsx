@@ -63,6 +63,11 @@ async function flush(): Promise<void> {
   await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)) })
 }
 
+/** A stand-in for the session standard seat `useInput` over a draft value. */
+function useInputOf(draft: string): PolishButtonProps['useInput'] {
+  return (selector) => selector({ draft })
+}
+
 describe('PolishButton', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
@@ -72,7 +77,7 @@ describe('PolishButton', () => {
   it('does not call the API and shows a hint when the draft is empty', () => {
     const fetchMock = stubFetch(() => Promise.resolve(jsonResponse({})))
     document.documentElement.lang = 'zh'
-    const { button, unmount } = mount({ sessionId: 's1', input: { draft: '   ' }, inputActions: { setDraft: vi.fn() } })
+    const { button, unmount } = mount({ sessionId: 's1', useInput: useInputOf('   '), inputActions: { setDraft: vi.fn() } })
     act(() => { button.click() })
     expect(lastPolishBody(fetchMock)).toBe('')
     expect(document.querySelector('.dpp2-toast')?.textContent).toContain('请先输入内容')
@@ -83,7 +88,7 @@ describe('PolishButton', () => {
     const setDraft = vi.fn()
     const fetchMock = stubFetch(() => Promise.resolve(jsonResponse({ ok: true, text: '润色后的消息' })))
     document.documentElement.lang = 'zh'
-    const { button, unmount } = mount({ sessionId: 's1', input: { draft: '帮我看看' }, inputActions: { setDraft } })
+    const { button, unmount } = mount({ sessionId: 's1', useInput: useInputOf('帮我看看'), inputActions: { setDraft } })
     act(() => { button.click() })
     await flush()
     expect(setDraft).toHaveBeenCalledWith('润色后的消息')
@@ -91,27 +96,42 @@ describe('PolishButton', () => {
     unmount()
   })
 
-  it('inherits the session channel via resolveModel when no provider is configured', async () => {
+  it('falls back to the legacy input owner share when the standard seat is absent', async () => {
     const setDraft = vi.fn()
     const fetchMock = stubFetch(() => Promise.resolve(jsonResponse({ ok: true, text: '润色结果' })))
     document.documentElement.lang = 'zh'
-    const resolveModel = vi.fn().mockResolvedValue({ provider: 'deepseek-official', model: 'deepseek-v4-pro' })
+    const { button, unmount } = mount({ sessionId: 's1', input: { draft: '旧通道草稿' }, inputActions: { setDraft } })
+    act(() => { button.click() })
+    await flush()
+    const parsed = JSON.parse(lastPolishBody(fetchMock)) as { text?: string }
+    expect(parsed.text).toBe('旧通道草稿')
+    unmount()
+  })
+
+  it('inherits the session channel via the modelSelection projection when no provider is configured', async () => {
+    const setDraft = vi.fn()
+    const fetchMock = stubFetch(() => Promise.resolve(jsonResponse({ ok: true, text: '润色结果' })))
+    document.documentElement.lang = 'zh'
+    const useProjection = vi.fn(() => ({
+      lastUsed: { provider: 'deepseek-official', model: 'deepseek-v4-pro' },
+      next: null,
+    }))
     const { button, unmount } = mount({
       sessionId: 's1',
-      input: { draft: '草稿' },
+      useInput: useInputOf('草稿'),
       inputActions: { setDraft },
-      resolveModel,
+      useProjection,
     })
     act(() => { button.click() })
     await flush()
-    expect(resolveModel).toHaveBeenCalledWith('s1')
+    expect(useProjection).toHaveBeenCalledWith('modelSelection')
     const parsed = JSON.parse(lastPolishBody(fetchMock)) as { provider?: string; model?: string }
     expect(parsed.provider).toBe('deepseek-official')
     expect(parsed.model).toBe('deepseek-v4-pro')
     unmount()
   })
 
-  it('uses the configured provider from the config route', async () => {
+  it('uses the configured provider from the config route ahead of the projection', async () => {
     const setDraft = vi.fn()
     const fetchMock = vi.fn((url: string | URL | Request) => {
       if (String(url).includes('/config')) {
@@ -121,18 +141,20 @@ describe('PolishButton', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
     document.documentElement.lang = 'zh'
-    const resolveModel = vi.fn()
+    const useProjection = vi.fn(() => ({
+      lastUsed: { provider: 'session-provider', model: 'session-model' },
+      next: null,
+    }))
     const { button, unmount } = mount({
       sessionId: 's1',
-      input: { draft: '草稿' },
+      useInput: useInputOf('草稿'),
       inputActions: { setDraft },
-      resolveModel,
+      useProjection,
     })
     // Wait for the config preload to land, then click.
     await flush()
     act(() => { button.click() })
     await flush()
-    expect(resolveModel).not.toHaveBeenCalled()
     const parsed = JSON.parse(lastPolishBody(fetchMock)) as { provider?: string; model?: string }
     expect(parsed.provider).toBe('custom-provider')
     expect(parsed.model).toBe('custom-model')
@@ -143,7 +165,7 @@ describe('PolishButton', () => {
     let resolveFetch: (value: Response) => void = () => {}
     stubFetch(() => new Promise<Response>((resolve) => { resolveFetch = resolve }))
     document.documentElement.lang = 'zh'
-    const { button, unmount } = mount({ sessionId: 's1', input: { draft: '草稿' }, inputActions: { setDraft: vi.fn() } })
+    const { button, unmount } = mount({ sessionId: 's1', useInput: useInputOf('草稿'), inputActions: { setDraft: vi.fn() } })
     act(() => { button.click() })
     await flush()
     expect(button.getAttribute('data-loading')).toBe('true')
@@ -163,7 +185,7 @@ describe('PolishButton', () => {
     let resolveFetch: (value: Response) => void = () => {}
     const fetchMock = stubFetch(() => new Promise<Response>((resolve) => { resolveFetch = resolve }))
     document.documentElement.lang = 'zh'
-    const { button, unmount } = mount({ sessionId: 's1', input: { draft: '草稿' }, inputActions: { setDraft: vi.fn() } })
+    const { button, unmount } = mount({ sessionId: 's1', useInput: useInputOf('草稿'), inputActions: { setDraft: vi.fn() } })
     act(() => { button.click() })
     await flush() // the first polish request is now in flight
     act(() => { button.click() })
@@ -184,7 +206,7 @@ describe('PolishButton', () => {
       { status: 400, headers: { 'content-type': 'application/json' } },
     )))
     document.documentElement.lang = 'zh'
-    const { button, unmount } = mount({ sessionId: 's1', input: { draft: '草稿' }, inputActions: { setDraft } })
+    const { button, unmount } = mount({ sessionId: 's1', useInput: useInputOf('草稿'), inputActions: { setDraft } })
     act(() => { button.click() })
     await flush()
     expect(setDraft).not.toHaveBeenCalled()
@@ -196,7 +218,7 @@ describe('PolishButton', () => {
   it('tolerates an absent inputActions (inert seat) without crashing', () => {
     stubFetch(() => Promise.resolve(jsonResponse({ ok: true, text: '结果' })))
     document.documentElement.lang = 'zh'
-    const { button, unmount } = mount({ sessionId: 's1', input: { draft: '草稿' } })
+    const { button, unmount } = mount({ sessionId: 's1', useInput: useInputOf('草稿') })
     act(() => { button.click() })
     unmount()
   })

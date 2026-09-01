@@ -87,6 +87,18 @@ describe('buildApi.polish', () => {
     await expect(api.polish({ text: '你好' })).rejects.toMatchObject({ code: 'no-provider' })
   })
 
+  it('falls back to the default channel when no explicit channel resolves', async () => {
+    const services = mockServices({ llm: vi.fn().mockReturnValue(streamText('ok')) })
+    const defaultChannel = vi.fn(() => ({ provider: 'deepseek-official', model: 'deepseek-v4-flash-vision-exp' }))
+    const api = buildApi(ctxOf(services), () => configOf({ provider: '' }), () => undefined, defaultChannel)
+    await api.polish({ text: '你好' })
+    expect(defaultChannel).toHaveBeenCalled()
+    const call = services.llm.mock.calls[0][0] as { provider: string; model: string }
+    // 渠道接口：provider 走默认渠道（覆盖空 provider）；model 保留配置默认（非空则不被覆盖）。
+    expect(call.provider).toBe('deepseek-official')
+    expect(call.model).toBe(DRAFT_POLISH_DEFAULTS.model)
+  })
+
   it('prefers the payload provider/model over the config', async () => {
     const services = mockServices({ llm: vi.fn().mockReturnValue(streamText('ok')) })
     const api = buildApi(ctxOf(services), () => configOf({ provider: 'cfg', model: 'cfg-model' }), () => undefined)

@@ -23,7 +23,7 @@ import {
   DraftPolishPrefsSchema,
   type DraftPolishConfig,
 } from './config.ts'
-import { buildApi, buildContext, type ConfigFace } from './host-api.ts'
+import { buildApi, buildContext, type ConfigFace, type DefaultChannel } from './host-api.ts'
 import { isTrustedApiRequest } from './trust-fence.ts'
 import { DraftPolishError, readJsonBody, writeError, writeJson, writeOk } from './wire.ts'
 import type { DraftPolishSettingsScope, DraftPolishSettingsService } from './context-types.ts'
@@ -105,8 +105,17 @@ export function apply(ctx: Context): void {
     }
   }
 
+  // ── Default channel ───────────────────────────────────────────────────────
+  // DSH 默认模型渠道（agent-default-model，会话创建时应用的选择）：客户端未
+  // 携带会话投影（无请求记录的新会话）或未配置 provider 时，润色用它兜底。
+  let resolveDefaultChannel: (() => DefaultChannel | undefined) | undefined
+  ctx.inject(['agentDefaultModel'], (actx) => {
+    if (actx.agentDefaultModel === undefined) return
+    resolveDefaultChannel = () => actx.agentDefaultModel.currentSelection() ?? undefined
+  })
+
   // ── JSON API ──────────────────────────────────────────────────────────────
-  const api = buildApi(ctx, getConfig, () => configFace)
+  const api = buildApi(ctx, getConfig, () => configFace, () => resolveDefaultChannel?.())
   ctx.effect(() => ctx.webServer.register({
     kind: 'prefix',
     path: '/draft-polish/api',

@@ -37,12 +37,12 @@ Or add to the profile's `package.json` dependencies + `dsh.profile.bundles`:
 
 ### Settings
 
-Settings page → "Polish" (or the `draft-polish` settings namespace): provider/model channel, `contextEnabled`, `recentWindowMessages` (verbatim recent window), `backgroundEnabled`/`backgroundWindowMessages` (optional fast-model background compression), `temperature`, `timeoutMs`.
+Settings page → "Configurable plugins" → the "Draft Polish" card (since DSH 0.1.2-alpha.2; the `draft-polish` settings namespace): provider/model channel, `contextEnabled`, `recentWindowMessages` (verbatim recent window), `backgroundEnabled`/`backgroundWindowMessages` (optional fast-model background compression), `temperature`, `timeoutMs`.
 
 ## Architecture
 
 - **Host half** (`lib/index.js`): `/draft-polish/api` routes (same trust fence as the /api gateway) — `sessionQuery.readSurface` reads the session context → `llm.stream` polishes (DSH channel, independent of session scheduling) → returns the text; the `draft-polish` settings namespace.
-- **Client half** (`lib/client.js`): registers in the `conversation.input.right` slot (the official "before the send button" seat) — reads the draft (owner props) → fetches the host → writes back via the standard-kit `inputActions.setDraft`; registers a `settings.section` form.
+- **Client half** (`lib/client.js`): registers in the `conversation.input.right` slot (the official "before the send button" seat) — reads the draft (owner props) → fetches the host → writes back via the standard-kit `inputActions.setDraft`; registers the `settings.plugin.item` card keyed by the `draft-polish` namespace. Channel inheritance reads the session standard seat `useProjection('modelSelection')` (host `model-selection-projection`, `next = pending ?? lastUsed`).
 - Context strategy inherits dsh-sidebar-qa: verbatim recent window (anchors the latest state) + optional compressed background (≤3 sentences), newest-first; any failure degrades to context-free polishing.
 
 ## Development
