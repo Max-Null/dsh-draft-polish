@@ -45,7 +45,7 @@ dsh plugin --profile <name> add @max-null/dsh-draft-polish
 
 ### 设置
 
-设置页 →「可配置插件」→「草稿润色」卡片（DSH 0.1.2-alpha.2 起，配置命名空间 `draft-polish`）：
+设置页 → 左栏「润色设置」条目（DSH 0.1.2-alpha.2 起，配置命名空间 `draft-polish`）：
 
 | 配置 | 默认 | 说明 |
 |---|---|---|
@@ -71,8 +71,16 @@ dsh plugin --profile <name> add @max-null/dsh-draft-polish
 
 | 插件版本 | 适配 DSH 内核 | 说明 |
 |---|---|---|
-| 0.2.2+ | 0.1.2-alpha.2+ | client 端按 alpha.2 契约：无 `dsh-client-runtime`；设置卡片走 `settings.plugin.item`；模型继承走 `modelSelection` 投影 |
+| 0.2.2+ | 0.1.2-alpha.2+ | client 端按 alpha.2 契约：无 `dsh-client-runtime`；设置入口左栏 `settings.section` 单入口（0.2.2 定稿）；模型继承走 `modelSelection` 投影；0.2.3 起运行时零外部 npm 依赖 |
 | ≤0.2.1 | 0.1.1-rc.2 | `dsh-client-runtime` + `settings.section` + `connection.api.sessions.models`（alpha.2 均移除/失效） |
+
+## 权限与安全
+
+- **网络**：client 半端通过同源相对路径 `/draft-polish/api/*` 访问**当前 DSH 进程内**的 host JSON API（本机，不跨网络）；插件不请求任何外部 URL、不上传任何数据、无遥测。
+- **外部服务**：润色调用经 DSH `llm` 渠道发送到你已配置的模型供应商（复用现有渠道与凭证）；插件本身不持有 API Key、不直连任何模型服务。
+- **依赖**：运行时零外部 npm 依赖（schemastery 已从 `dependencies` 移除并内联进 `lib/index.js`）；peer 依赖仅 DSH 官方服务与 react（由 DSH 运行时提供）。
+- **文件系统**：不读写任何文件；唯一持久状态是 `draft-polish` 设置命名空间（由 DSH settings 服务管理）。
+- **失败边界**：host API 不可用 → 提示错误、草稿不变；LLM 失败 → 原草稿保留并提示（默认 30s 超时）；上下文读取失败 → 降级为不带上下文润色，不中断。
 
 ## 与 OC 版（分形）的差异
 

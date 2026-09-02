@@ -45,6 +45,14 @@ Settings page → "Configurable plugins" → the "Draft Polish" card (since DSH 
 - **Client half** (`lib/client.js`): registers in the `conversation.input.right` slot (the official "before the send button" seat) — reads the draft (owner props) → fetches the host → writes back via the standard-kit `inputActions.setDraft`; registers the `settings.plugin.item` card keyed by the `draft-polish` namespace. Channel inheritance reads the session standard seat `useProjection('modelSelection')` (host `model-selection-projection`, `next = pending ?? lastUsed`).
 - Context strategy inherits dsh-sidebar-qa: verbatim recent window (anchors the latest state) + optional compressed background (≤3 sentences), newest-first; any failure degrades to context-free polishing.
 
+## Permissions & Risks
+
+- **Network**: the client half talks to the **current DSH process only** through same-origin relative `/draft-polish/api/*` JSON routes (local, no cross-network traffic); the plugin never calls external URLs, never uploads data, and has no telemetry.
+- **External services**: polish calls go through the DSH `llm` channel to the model provider you already configured — the plugin holds no API keys and never talks to any model service directly.
+- **Dependencies**: zero runtime npm dependencies (schemastery was removed from `dependencies` and is inlined into `lib/index.js`); peer deps are DSH official services and react, provided by the DSH runtime.
+- **File system**: reads/writes no files; the only persistent state is the `draft-polish` settings namespace (managed by the DSH settings service).
+- **Failure bounds**: host API unavailable → error notice, draft untouched; LLM failure → original draft preserved (default 30s timeout); context read failure → degrade to context-free polishing without interrupting.
+
 ## Development
 
 ```bash

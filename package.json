@@ -1,6 +1,6 @@
 {
   "name": "@max-null/dsh-draft-polish",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "DSH 草稿润色：发送按钮左侧 ✨ 一键调用 LLM 润色输入框草稿，可选携带会话上下文帮助模型理解意图；走 DSH llm 渠道，会话进行中也能用",
   "type": "module",
   "license": "MIT",
@@ -30,6 +30,9 @@
     "LICENSE",
     "docs"
   ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -42,6 +45,12 @@
         "@deepseek-ai/dsh-client-ui-session"
       ],
       "platform": "web"
+    },
+    "compatibility": {
+      "dsh": "^0.1.2-alpha.2",
+      "dshReleases": {
+        "0.1.2-alpha.2": "compatible"
+      }
     }
   },
   "scripts": {
@@ -69,9 +78,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "dependencies": {
-    "schemastery": "^3.18.0"
-  },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.2",
     "@deepseek-ai/dsh-client-ui-conversation": "^0.1.2-alpha.2",
@@ -88,6 +94,7 @@
     "react-dom": "^18.2.0",
     "tsdown": "^0.22.2",
     "typescript": "^5.6.0",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "schemastery": "^3.18.0"
   }
 }
