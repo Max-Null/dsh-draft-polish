@@ -28,8 +28,7 @@
     "README.md",
     "README_EN.md",
     "LICENSE",
-    "docs"
-  ],
+    "docs", "docs/shots"],
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },

@@ -9,8 +9,13 @@ This plugin belongs to the **`@max-null/*` family** — a set of plugins that to
 > 从 **分形（OC 桌面壳）** 迁移进化的功能：OC 环境受 serve 并发缺陷限制，会话正在输出时无法润色；DSH 的 `llm` 能力与会话调度完全解耦，**会话进行中也能润色**，且可携带**当前会话上下文**帮助模型理解你的意图（参考 dsh-sidebar-qa 的提问带上下文机制）。
 
 ## 截图
+装完后在设置里多出「润色设置」一项：
 
-（待补充：发送按钮左侧 ✨ 按钮 + 润色效果）
+**入口：** 设置 → 润色设置
+
+| 设置入口与面板 |
+|---|
+| ![设置 → 润色设置](docs/shots/polish-settings-1.png) |
 
 ## 特性
 
