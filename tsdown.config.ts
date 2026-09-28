@@ -44,9 +44,12 @@ export default [
     fixedExtension: false,
     dts: false,
     clean: false,
-    // Bundle schemastery into the host artifact so the plugin never depends on
-    // a runtime resolution of the (possibly diverged) schemastery instance.
-    noExternal: ['schemastery'],
+    // Bundle the schema library into the host artifact so the plugin never
+    // depends on a runtime resolution of the (possibly diverged) instance.
+    // The specifier must match the import exactly — the 0.1.7 rename moved the
+    // import to the rescoped `@deepseek-ai/schemastery`, which a bare
+    // `schemastery` entry no longer matches.
+    noExternal: ['@deepseek-ai/schemastery'],
   },
   {
     entry: { client: 'src/client/index.tsx' },

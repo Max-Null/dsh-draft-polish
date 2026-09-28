@@ -94,14 +94,6 @@ export interface DraftPolishLoader {
   entries(): Iterable<DraftPolishLoaderEntry>
 }
 
-/** The settings namespace scope this plugin reads. */
-export interface DraftPolishSettingsScope<T> {
-  get(): T
-  watch(callback: (next: T, prev: T) => void): () => void
-  /** Merge a partial patch into this namespace's user layer (no revision guard). */
-  update(patch: object): Promise<void>
-}
-
 /** One current selection emitted by the agent-default-model service. */
 export interface DraftPolishDefaultSelection {
   provider: string
@@ -121,9 +113,10 @@ export interface DraftPolishSettingsDescriptor {
   revision: number
 }
 
-/** The settings service face (register + revision-guarded update + describe). */
+/** The settings service face this plugin reads and writes.
+ *  0.1.7：不再有 `register`——插件的 Config schema 自带 section，这里只保留
+ *  `describe`（读）与 `update`（写，带 revision 守卫），两者在 0.1.7 仍然存在。 */
 export interface DraftPolishSettingsService {
-  register<T>(ns: string, schema: unknown, options?: object): DraftPolishSettingsScope<T>
   describe(options?: { redactSecrets?: boolean }): DraftPolishSettingsDescriptor[]
   update(ns: string, patch: object, expectedRevision?: number): Promise<void>
 }

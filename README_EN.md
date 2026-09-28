@@ -4,6 +4,18 @@ A **draft polish** plugin for [DeepSeek Harness](https://github.com/deepseek-ai/
 
 > Evolved from the **Fractal (OC desktop shell)** implementation: OC's serve concurrency bugs made polishing impossible while a session was still generating; DSH's `llm` capability is decoupled from session scheduling, so **polishing works mid-generation** — and it can carry the **current conversation context** to help the model understand your intent (the dsh-sidebar-qa ask-with-context mechanism).
 
+## Screenshots
+
+The configuration card lives on this plugin's own detail page (DSH 0.1.7 onward, via the `plugins.bundle.config` slot keyed by package name; `settings.plugin.item` is occupied by the official settings pages):
+
+**Entry:** Plugins → `@max-null/dsh-draft-polish` → the configuration card
+
+| Configuration card |
+|---|
+| ![Draft polish configuration card](docs/shots/polish-settings-1.png) |
+
+> The shot shows the v0.2.3 form — the entry lived in the settings dialog's left rail then, and moved to the plugin detail page in 0.2.4. Fields and defaults are unchanged; the shot is pending a re-capture at the new entry.
+
 ## Features
 
 | Capability | Description |
@@ -37,19 +49,19 @@ Or add to the profile's `package.json` dependencies + `dsh.profile.bundles`:
 
 ### Settings
 
-Settings page → "Configurable plugins" → the "Draft Polish" card (since DSH 0.1.2-alpha.2; the `draft-polish` settings namespace): provider/model channel, `contextEnabled`, `recentWindowMessages` (verbatim recent window), `backgroundEnabled`/`backgroundWindowMessages` (optional fast-model background compression), `temperature`, `timeoutMs`.
+Plugins page → the `@max-null/dsh-draft-polish` detail page → the configuration card (DSH 0.1.7 onward, registered into the `plugins.bundle.config` slot keyed by package name). The form reads and writes the host `draft-polish` settings namespace through `/draft-polish/api/config`, and Save applies immediately: provider/model channel, `contextEnabled`, `recentWindowMessages` (verbatim recent window), `backgroundEnabled`/`backgroundWindowMessages` (optional fast-model background compression), `temperature`, `timeoutMs`.
 
 ## Architecture
 
 - **Host half** (`lib/index.js`): `/draft-polish/api` routes (same trust fence as the /api gateway) — `sessionQuery.readSurface` reads the session context → `llm.stream` polishes (DSH channel, independent of session scheduling) → returns the text; the `draft-polish` settings namespace.
-- **Client half** (`lib/client.js`): registers in the `conversation.input.right` slot (the official "before the send button" seat) — reads the draft (owner props) → fetches the host → writes back via the standard-kit `inputActions.setDraft`; registers the `settings.plugin.item` card keyed by the `draft-polish` namespace. Channel inheritance reads the session standard seat `useProjection('modelSelection')` (host `model-selection-projection`, `next = pending ?? lastUsed`).
+- **Client half** (`lib/client.js`): registers in the `conversation.input.right` slot (the official "before the send button" seat) — reads the draft (the session standard seat `useInput`, falling back to owner props) → fetches the host → writes back via the standard-kit `inputActions.setDraft`; registers the `plugins.bundle.config` card keyed by the package name. Channel inheritance reads the session standard seat `useProjection('modelSelection')` (host `model-selection-projection`, `next = pending ?? lastUsed`).
 - Context strategy inherits dsh-sidebar-qa: verbatim recent window (anchors the latest state) + optional compressed background (≤3 sentences), newest-first; any failure degrades to context-free polishing.
 
 ## Permissions & Risks
 
 - **Network**: the client half talks to the **current DSH process only** through same-origin relative `/draft-polish/api/*` JSON routes (local, no cross-network traffic); the plugin never calls external URLs, never uploads data, and has no telemetry.
 - **External services**: polish calls go through the DSH `llm` channel to the model provider you already configured — the plugin holds no API keys and never talks to any model service directly.
-- **Dependencies**: zero runtime npm dependencies (schemastery was removed from `dependencies` and is inlined into `lib/index.js`); peer deps are DSH official services and react, provided by the DSH runtime.
+- **Dependencies**: zero runtime npm dependencies (the schema library is `@deepseek-ai/schemastery`, listed only in `devDependencies` and inlined into `lib/index.js` at build time); peer deps are DSH official services and react, provided by the DSH runtime.
 - **File system**: reads/writes no files; the only persistent state is the `draft-polish` settings namespace (managed by the DSH settings service).
 - **Failure bounds**: host API unavailable → error notice, draft untouched; LLM failure → original draft preserved (default 30s timeout); context read failure → degrade to context-free polishing without interrupting.
 

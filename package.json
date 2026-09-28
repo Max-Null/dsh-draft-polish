@@ -1,6 +1,6 @@
 {
   "name": "@max-null/dsh-draft-polish",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "description": "DSH 草稿润色：发送按钮左侧 ✨ 一键调用 LLM 润色输入框草稿，可选携带会话上下文帮助模型理解意图；走 DSH llm 渠道，会话进行中也能用",
   "type": "module",
   "license": "MIT",
@@ -28,7 +28,9 @@
     "README.md",
     "README_EN.md",
     "LICENSE",
-    "docs", "docs/shots"],
+    "docs",
+    "docs/shots"
+  ],
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },
@@ -69,22 +71,23 @@
     "llm"
   ],
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-client-ui-conversation": "^0.1.2-alpha.2",
-    "@deepseek-ai/dsh-client-ui-session": "^0.1.2-alpha.2",
-    "@deepseek-ai/dsh-client-ui-slots": "^0.1.2-alpha.2",
-    "@deepseek-ai/dsh-settings": "^0.1.2-alpha.2",
+    "@deepseek-ai/cordis": "^4.0.4",
+    "@deepseek-ai/dsh-client-ui-conversation": ">=0.1.7-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-plugin-manager": ">=0.1.7-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-session": ">=0.1.7-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.7-rc.2 <0.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-client-ui-conversation": "^0.1.2-alpha.2",
-    "@deepseek-ai/dsh-client-ui-renderer": "^0.1.2-alpha.2",
-    "@deepseek-ai/dsh-client-ui-session": "^0.1.2-alpha.2",
-    "@deepseek-ai/dsh-client-ui-settings": "^0.1.2-alpha.2",
-    "@deepseek-ai/dsh-client-ui-slots": "^0.1.2-alpha.2",
-    "@deepseek-ai/dsh-settings": "^0.1.2-alpha.2",
+    "@deepseek-ai/cordis": "^4.0.4",
+    "@deepseek-ai/dsh-client-ui-conversation": ">=0.1.7-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-plugin-manager": ">=0.1.7-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-renderer": ">=0.1.7-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-session": ">=0.1.7-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-client-ui-settings": ">=0.1.7-rc.2 <0.3.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.7-rc.2 <0.3.0",
+    "@deepseek-ai/schemastery": "^3.18.4",
     "@types/node": "^22.0.0",
     "@types/react": "~18.3.1",
     "@types/react-dom": "^18.3.7",
@@ -93,7 +96,6 @@
     "react-dom": "^18.2.0",
     "tsdown": "^0.22.2",
     "typescript": "^5.6.0",
-    "vitest": "^4.1.8",
-    "schemastery": "^3.18.0"
+    "vitest": "^4.1.8"
   }
 }

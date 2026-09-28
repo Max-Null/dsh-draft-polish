@@ -1,11 +1,11 @@
 /**
- * PolishSettings: the settings.plugin.item card (DSH 0.1.2-alpha.2 — the
- * configurable-plugins tab entry keyed by the `draft-polish` namespace) — a
+ * PolishSettings: the `plugins.bundle.config` card (key = package name) — a
  * compact form over the host `draft-polish` settings namespace (fetched and
- * saved through the /draft-polish/api/config routes). Deliberately minimal:
- * only the knobs a user realistically touches live here; everything else
- * keeps defaults. The card manages its own state (no settingsScope face),
- * so the register call supplies no inject hooks.
+ * saved through the /draft-polish/api/config routes). It renders on the
+ * plugin's own page under 「插件」. Deliberately minimal: only the knobs a
+ * user realistically touches live here; everything else keeps defaults. The
+ * card manages its own state (no settingsScope face), so the register call
+ * supplies no inject hooks.
  *
  * Styling follows the DSH native settings language (ui-settings-plugins
  * `fields.module.css`): stacked fields with border-top separators, 13px
@@ -19,7 +19,6 @@ import { draftPolishApi, DraftPolishApiError, type DraftPolishConfigView } from 
 /** Product copy (zh/en via the document lang). */
 const STRINGS: Record<string, Record<string, string>> = {
   zh: {
-    settingsNav: '润色设置',
     setTitle: '草稿润色',
     setSubtitle: '配置润色按钮使用的模型渠道与上下文策略。默认复用 DSH 现有渠道，开箱即用。',
     setContext: '携带会话上下文',
@@ -43,7 +42,6 @@ const STRINGS: Record<string, Record<string, string>> = {
     setSaveFail: '保存失败：',
   },
   en: {
-    settingsNav: 'Polish',
     setTitle: 'Draft Polish',
     setSubtitle: 'Configure the model channel and context strategy for the polish button. Reuses the DSH channel by default — works out of the box.',
     setContext: 'Carry conversation context',

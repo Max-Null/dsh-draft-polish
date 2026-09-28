@@ -1,6 +1,6 @@
 # @max-null/dsh-draft-polish
 
-本插件属于 **`@max-null/*` 插件系列**——这一系列共同构成 **[SSID（思灵 · Seek Soul in Darkness）](https://github.com/Max-Null/seek-soul-in-darkness)** 桌面体验。SSID 是整合它们的盒：`dsh-capture` · `dsh-chat-rail` · `dsh-chinese-thinking` · `dsh-draft-polish` · `dsh-guardian` · `dsh-habit` · `dsh-memory` · `dsh-node-appearance` · `dsh-plugin-center` · `dsh-quick-toolbar` · `dsh-skill-mcp-center` · `dsh-ssid-panels` · `dsh-ssid-zh-ui` · `dsh-achievements`。
+本插件属于 **`@max-null/*` 插件系列**——这一系列共同构成 **[SSID（思灵 · Seek Soul in Darkness）](https://github.com/Max-Null/seek-soul-in-darkness)** 桌面体验。SSID 是整合它们的盒：`dsh-capture` · `dsh-chat-rail` · `dsh-chinese-thinking` · `dsh-draft-polish` · `dsh-guardian` · `dsh-habit` · `dsh-memory` · `dsh-node-appearance` · `dsh-plugin-center` · `dsh-quick-toolbar` · `dsh-skill-mcp-center` · `dsh-ssid-panels` · `dsh-ssid-zh-ui` · `dsh-achievements` · `dsh-allostasis` · `dsh-skills` · `dsh-ssid-env` · `dsh-ssid-pwsh-retry` · `dsh-tone-layer`。
 
 This plugin belongs to the **`@max-null/*` family** — a set of plugins that together form the **[SSID (思灵 · Seek Soul in Darkness)](https://github.com/Max-Null/seek-soul-in-darkness)** desktop experience.
 
@@ -9,13 +9,16 @@ This plugin belongs to the **`@max-null/*` family** — a set of plugins that to
 > 从 **分形（OC 桌面壳）** 迁移进化的功能：OC 环境受 serve 并发缺陷限制，会话正在输出时无法润色；DSH 的 `llm` 能力与会话调度完全解耦，**会话进行中也能润色**，且可携带**当前会话上下文**帮助模型理解你的意图（参考 dsh-sidebar-qa 的提问带上下文机制）。
 
 ## 截图
-装完后在设置里多出「润色设置」一项：
 
-**入口：** 设置 → 润色设置
+配置面板在本插件的详情页（DSH 0.1.7 起走 `plugins.bundle.config` 槽，key 为包名；`settings.plugin.item` 已被官方设置页占用）：
 
-| 设置入口与面板 |
+**入口：** 插件 → `@max-null/dsh-draft-polish` → 配置卡片
+
+| 配置面板 |
 |---|
-| ![设置 → 润色设置](docs/shots/polish-settings-1.png) |
+| ![草稿润色配置面板](docs/shots/polish-settings-1.png) |
+
+> 图为 v0.2.3 形态——当时入口在设置对话框左栏，0.2.4 起迁至插件详情页，面板字段与默认值未变。该截图待按新入口重截。
 
 ## 特性
 
@@ -44,13 +47,13 @@ dsh plugin --profile <name> add @max-null/dsh-draft-polish
 ## 使用
 
 1. 在输入框里写草稿；
-2. 点发送按钮左侧的 ✨ 按钮（输入为空时按钮不触发）；
+2. 点发送按钮左侧的 ✨ 按钮（输入为空时提示「请先输入内容」，不发起请求）；
 3. 等待数秒，润色结果自动替换输入框内容（按钮转圈表示润色中）；
 4. 检查结果，满意后照常发送。
 
 ### 设置
 
-设置页 → 左栏「润色设置」条目（DSH 0.1.2-alpha.2 起，配置命名空间 `draft-polish`）：
+「插件」页 → `@max-null/dsh-draft-polish` 详情页 → 配置卡片（DSH 0.1.7 起走 `plugins.bundle.config` 槽，key 为包名）。表单经 `/draft-polish/api/config` 读写 host 的 `draft-polish` 设置命名空间，改完点「保存」即时生效：
 
 | 配置 | 默认 | 说明 |
 |---|---|---|
@@ -68,22 +71,23 @@ dsh plugin --profile <name> add @max-null/dsh-draft-polish
 
 ## 架构
 
-- **host 半端**（`lib/index.js`）：`/draft-polish/api` 路由（trust fence 同 /api 网关）——`sessionQuery.readSurface` 读会话上下文 → `llm.stream` 润色（复用 DSH 渠道，独立于会话调度）→ 回传文本；`draft-polish` settings 命名空间。
-- **client 半端**（`lib/client.js`）：`conversation.input.right` 槽（发送按钮左侧官方座位）注入 ✨ 按钮——读草稿（标准座 `useInput`，回退 owner props）→ fetch host → 结果经标准 kit `inputActions.setDraft` 写回；`settings.section`（设置左栏「润色设置」条目 + sparkles 图标）注册设置表单。模型渠道继承读会话标准座 `useProjection('modelSelection')`（host `model-selection-projection`，`next = pending ?? lastUsed`）。
+- **host 半端**（`lib/index.js`）：`/draft-polish/api` 路由（trust fence 同 /api 网关）——`sessionQuery.readSurface` 读会话上下文 → `llm.stream` 润色（复用 DSH 渠道，独立于会话调度）→ 回传文本；`draft-polish` settings 命名空间；client 未携带渠道时经 `agentDefaultModel` 兜底到 DSH 默认模型。
+- **client 半端**（`lib/client.js`）：`conversation.input.right` 槽（发送按钮左侧官方座位）注入 ✨ 按钮——读草稿（标准座 `useInput`，回退 owner props）→ fetch host → 结果经标准 kit `inputActions.setDraft` 写回；`plugins.bundle.config`（插件详情页的配置卡片，key 为包名）注册设置表单。模型渠道继承读会话标准座 `useProjection('modelSelection')`（host `model-selection-projection`，`next = pending ?? lastUsed`）。
 - 上下文策略继承 dsh-sidebar-qa：近期对话原文截断（锚定最新状态）+ 更早背景可选压缩（≤3 句摘要），从新到旧排列；任何失败降级为不带上下文，润色不中断。
 
 ## 兼容性
 
 | 插件版本 | 适配 DSH 内核 | 说明 |
 |---|---|---|
-| 0.2.2+ | 0.1.2-alpha.2+ | client 端按 alpha.2 契约：无 `dsh-client-runtime`；设置入口左栏 `settings.section` 单入口（0.2.2 定稿）；模型继承走 `modelSelection` 投影；0.2.3 起运行时零外部 npm 依赖 |
+| 0.2.4+ | 0.1.7-rc.2 – 0.2.x | 设置入口迁至插件详情页 `plugins.bundle.config`（`settings.plugin.item` 已被官方设置页占用）；schema 库迁至 `@deepseek-ai/schemastery` 且每个可变字段标 `.volatile()`；peer 声明为 `>=0.1.7-rc.2 <0.3.0`，同时覆盖 0.2.0-rc.1 |
+| 0.2.2–0.2.3 | 0.1.2-alpha.2+ | client 端按 alpha.2 契约：无 `dsh-client-runtime`；设置入口 `settings.plugin.item`（0.2.2 定稿）；模型继承走 `modelSelection` 投影；0.2.3 起运行时零外部 npm 依赖 |
 | ≤0.2.1 | 0.1.1-rc.2 | `dsh-client-runtime` + `settings.section` + `connection.api.sessions.models`（alpha.2 均移除/失效） |
 
 ## 权限与安全
 
 - **网络**：client 半端通过同源相对路径 `/draft-polish/api/*` 访问**当前 DSH 进程内**的 host JSON API（本机，不跨网络）；插件不请求任何外部 URL、不上传任何数据、无遥测。
 - **外部服务**：润色调用经 DSH `llm` 渠道发送到你已配置的模型供应商（复用现有渠道与凭证）；插件本身不持有 API Key、不直连任何模型服务。
-- **依赖**：运行时零外部 npm 依赖（schemastery 已从 `dependencies` 移除并内联进 `lib/index.js`）；peer 依赖仅 DSH 官方服务与 react（由 DSH 运行时提供）。
+- **依赖**：运行时零外部 npm 依赖（schema 库为 `@deepseek-ai/schemastery`，只列在 `devDependencies`，构建期内联进 `lib/index.js`）；peer 依赖仅 DSH 官方服务与 react（由 DSH 运行时提供）。
 - **文件系统**：不读写任何文件；唯一持久状态是 `draft-polish` 设置命名空间（由 DSH settings 服务管理）。
 - **失败边界**：host API 不可用 → 提示错误、草稿不变；LLM 失败 → 原草稿保留并提示（默认 30s 超时）；上下文读取失败 → 降级为不带上下文润色，不中断。
 
@@ -106,6 +110,8 @@ pnpm build       # 产出 lib/
 ```
 
 ## SSID 系列
+
+本插件是 **[SSID（思灵 · Seek Soul in Darkness）](https://github.com/Max-Null/seek-soul-in-darkness)** 全家桶的一员；也可以单独安装到任意 DSH profile——除 DSH 官方服务与 react 外不依赖任何同系列插件。
 
 ## License
 

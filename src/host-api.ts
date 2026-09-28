@@ -54,7 +54,7 @@ function userMessage(text: string): DraftPolishLlmMessage {
     id: randomId(),
     role: 'user',
     content: [{ type: 'text', text }],
-    source: { kind: 'plugin', plugin: 'dsh-draft-polish' },
+    source: { kind: 'plugin:dsh-draft-polish' },
   }
 }
 
